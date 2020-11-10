@@ -1,4 +1,5 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <WinSock2.h>
 #include <windows.h>
 #include <stdio.h>
@@ -10,14 +11,14 @@ int main(void){
 	WSADATA dat;
 	WSAStartup(ver, &dat);
 
-	//1、建立客户端socket
+	//建立客户端socket
 	SOCKET client = socket(AF_INET,SOCK_STREAM,0 );
 	if (client == SOCKET_ERROR)
 		printf("建立socket失败...\n");
 	else
 		printf("建立socket成功!\n");
 
-	//2、连接服务器
+	//连接服务器
 	sockaddr_in _sin = {};
 	_sin.sin_family = AF_INET;
 	_sin.sin_port = htons(4567);
@@ -27,12 +28,20 @@ int main(void){
 	else
 		printf("连接服务器成功\n");
 
-	//3、接受服务器数据
-	char msg_buf[256];
-	recv(client, msg_buf, 256, 0);
-	printf("接收到数据：%s\n", msg_buf);
-
-	//4、关闭socket
+	//向服务器发送消息并接受数据
+	char rcv_buf[128];
+	char send_buf[128];
+	while (true) {
+		scanf("%s", send_buf);
+		if (strcmp(send_buf, "exit") == 0) {
+			printf("程序退出\n");
+			break;
+		}
+		send(client, send_buf, strlen(send_buf) + 1, 0);
+		recv(client, rcv_buf, 128, 0);
+		printf("接收到数据：%s\n", rcv_buf);
+	}
+	//关闭socket
 	getchar();
 	closesocket(client);
 
